@@ -286,7 +286,7 @@ class Team(BaseModel, extra=Extra.forbid):
     link: str
     first_year_of_play: str = Field("unknown", alias="firstYearOfPlay")
     venue: dict | None  # FIXME: implement Venue model
-    division: Division
+    division: Division | None
     conference: Conference | None
     franchise: Franchise | None
     official_site_url: str | None = Field(None, alias="officialSiteUrl")
@@ -345,6 +345,10 @@ class Team(BaseModel, extra=Extra.forbid):
 
     @validator("conference", pre=True)
     def discard_null_conference(cls, value: Any) -> Any:
+        return none_if_link_null(value)
+
+    @validator("division", pre=True)
+    def discard_null_division(cls, value: Any) -> Any:
         return none_if_link_null(value)
 
     @classmethod
