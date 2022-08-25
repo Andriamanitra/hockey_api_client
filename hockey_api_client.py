@@ -402,5 +402,3 @@ Franchises = Franchise
 Teams = Team
 Divisions = Division
 Conferences = Conference
-
-Conference.by_id(6)
