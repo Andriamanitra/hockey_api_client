@@ -31,21 +31,21 @@ def string_equal(orig: str, search: str) -> bool:
     return clean_str(orig) == clean_str(search)
 
 
-def link_validator(field_name: str):
+def none_if_link_null(value: Any) -> Any:
     """
-    Used as a validator for "link" fields of the models to
-    turn links returned by the API (without base url) into
-    something clickable.
+    Returns the given value unless it is a dict that contains key 'link' which points
+    to null resource. Used for validators.
 
     Examples:
     ========
-    # inside a class inheriting from pydantic.BaseModel
-    _link_validator = link_validator("link")
+    none_if_link_null({"link": "/api/v1/conferences/null})  #=> None
+    none_if_link_null({"a": 1})  #=> {"a": 1}
     """
-    def prepend_base_url(link: str):
-        return f"{API_BASE_URL}{link}"
-
-    return validator(field_name, allow_reuse=True)(prepend_base_url)
+    if isinstance(value, dict):
+        link = value.get("link")
+        if isinstance(link, str) and link.endswith("/null"):
+            return None
+    return value
 
 
 class NotFoundException(Exception):
@@ -62,8 +62,9 @@ class Conference(BaseModel, extra=Extra.forbid):
 
     possible_expands: ClassVar[list[str]] = []
 
-    # validators
-    _link_validator = link_validator("link")
+    @validator("link")
+    def prepend_base_url(cls, link: str) -> str:
+        return API_BASE_URL+link
 
     def __str__(self):
         return self.name
@@ -127,8 +128,13 @@ class Division(BaseModel, extra=Extra.forbid):
         "division.conference",
     ]
 
-    # validators
-    _link_validator = link_validator("link")
+    @validator("link")
+    def prepend_base_url(cls, v: str) -> str:
+        return API_BASE_URL+v
+
+    @validator("conference", pre=True)
+    def discard_null_conference(cls, value: Any) -> Any:
+        return none_if_link_null(value)
 
     @classmethod
     def all(cls, expands: list[str] = []) -> list[Division]:
@@ -189,8 +195,9 @@ class Franchise(BaseModel, extra=Extra.forbid):
     _fetched: ClassVar[bool] = False
     franchises_by_id: ClassVar[dict[int, Franchise]] = {}
 
-    # validators
-    _link_validator = link_validator("link")
+    @validator("link")
+    def prepend_base_url(cls, link: str) -> str:
+        return API_BASE_URL+link
 
     def __str__(self) -> str:
         return f"{self.location} {self.team_name}"
@@ -332,8 +339,13 @@ class Team(BaseModel, extra=Extra.forbid):
         "team.deviceProperties",
     ]
 
-    # validators
-    _link_validator = link_validator("link")
+    @validator("link")
+    def prepend_base_url(cls, link: str) -> str:
+        return API_BASE_URL+link
+
+    @validator("conference", pre=True)
+    def discard_null_conference(cls, value: Any) -> Any:
+        return none_if_link_null(value)
 
     @classmethod
     def from_obj(cls, obj: dict[str, Any]):
