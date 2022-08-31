@@ -25,8 +25,10 @@ def string_equal(orig: str, search: str) -> bool:
 
     Examples:
     ========
-    assert string_equal("Montréal", "montreal") is True
-    assert string_equal("ab", "abc") is False
+    >>> string_equal('Montréal', 'montreal')
+    True
+    >>> string_equal('ab', 'abc')
+    False
     """
     return clean_str(orig) == clean_str(search)
 
@@ -38,8 +40,10 @@ def none_if_link_null(value: Any) -> Any:
 
     Examples:
     ========
-    none_if_link_null({"link": "/api/v1/conferences/null})  #=> None
-    none_if_link_null({"a": 1})  #=> {"a": 1}
+    >>> none_if_link_null({'link': '/api/v1/conferences/null'}) is None
+    True
+    >>> none_if_link_null({'a': 1})
+    {'a': 1}
     """
     if isinstance(value, dict):
         link = value.get("link")
