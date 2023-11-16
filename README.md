@@ -1,3 +1,5 @@
+**NOTE** The old nhl.com API at https://statsapi.web.nhl.com/api stopped working in October 2023 so continuing this (very unfinished) project is pointless.
+
 # Hockey API Client
 
 Python wrapper for NHL.com api (https://statsapi.web.nhl.com/api/v1). Since there is no official documentation for the API (that I'm aware of), this work is largely based on the documentation by dword4 on Gitlab: https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md
